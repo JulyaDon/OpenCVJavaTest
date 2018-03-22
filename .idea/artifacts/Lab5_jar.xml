@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact name="Lab5:jar">
+    <output-path>$PROJECT_DIR$/classes/artifacts/Lab5_jar</output-path>
+    <root id="root">
+      <element id="archive" name="Lab5.jar">
+        <element id="module-output" name="Lab5" />
+      </element>
+      <element id="directory" name="libraries">
+        <element id="dir-copy" path="$PROJECT_DIR$/libraries" />
+      </element>
+    </root>
+  </artifact>
+</component>

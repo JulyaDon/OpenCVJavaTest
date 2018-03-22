@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: opencv-340.jar
+Main-Class: it.polito.teaching.cv.FaceDetection
+
