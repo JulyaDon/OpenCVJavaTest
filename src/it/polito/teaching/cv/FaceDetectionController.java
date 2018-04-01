@@ -23,6 +23,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import javax.xml.soap.Text;
+
 /**
  * The controller associated with the only view of our application. The
  * application logic is implemented here. It handles the button for
@@ -45,10 +47,22 @@ public class FaceDetectionController
 	// checkboxes for enabling/disabling a classifier
 	@FXML
 	private CheckBox haarClassifier;
-	@FXML
-	private CheckBox lbpClassifier;
+
 	@FXML
 	private TextField textAddress;
+
+	@FXML
+	private TextField textScale;
+
+	@FXML
+	private TextField textMinSize;
+
+	@FXML
+	private TextField textMinNeigh;
+
+	@FXML
+	private TextField textMaxSize;
+
 	
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
@@ -60,6 +74,10 @@ public class FaceDetectionController
 	// face cascade classifier
 	private CascadeClassifier faceCascade;
 	private int absoluteFaceSize;
+	private double scaleFac;
+	private int minNeigh;
+	private int minSize;
+	private int maxSize;
 	
 	/**
 	 * Init the controller, at start time
@@ -87,35 +105,28 @@ public class FaceDetectionController
 		{
 			// disable setting checkboxes
 			this.haarClassifier.setDisable(true);
-			this.lbpClassifier.setDisable(true);
 
-			System.out.println("Test output 1");
 			// start the video capture
+			if(textAddress.getText().equals("0")){
+				this.capture.open(Integer.parseInt(textAddress.getText()));
+			} else
 			this.capture.open(address);
 			
 			// is the video stream available?
-//			if (this.capture.isOpened())
-//			{
+			if (this.capture.isOpened())
+			{
 
 				this.cameraActive = true;
-			System.out.println("Test output 2");
 				// grab a frame every 33 ms (30 frames/sec)
 				Runnable frameGrabber = new Runnable() {
 
 					@Override
 					public void run()
 					{
-						System.out.println(1);
 						// effectively grab and process a single frame
 						Mat frame = grabFrame();
-						System.out.println(2);
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
-						System.out.println(3);
-						if(imageToShow.getHeight()<100){
-							System.out.println("Ooo shit!");
-						}
-
 						updateImageView(originalFrame, imageToShow);
 					}
 				};
@@ -125,12 +136,12 @@ public class FaceDetectionController
 				
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
-			//}
-//			else
-//			{
-//				// log the error
-//				System.err.println("Failed to open the camera connection...");
-//			}
+			}
+			else
+			{
+				// log the error
+				System.err.println("Failed to open the camera connection...");
+			}
 		}
 		else
 		{
@@ -140,7 +151,6 @@ public class FaceDetectionController
 			this.cameraButton.setText("Start Camera");
 			// enable classifiers checkboxes
 			this.haarClassifier.setDisable(false);
-			this.lbpClassifier.setDisable(false);
 			
 			// stop the timer
 			this.stopAcquisition();
@@ -170,6 +180,7 @@ public class FaceDetectionController
 					// face detection
 					this.detectAndDisplay(frame);
 				}
+				else System.out.println("Frame is empty");
 				
 			}
 			catch (Exception e)
@@ -190,6 +201,10 @@ public class FaceDetectionController
 	 */
 	private void detectAndDisplay(Mat frame)
 	{
+		scaleFac = Double.parseDouble(textScale.getText());
+		minNeigh = Integer.parseInt(textMinNeigh.getText());
+		minSize = Integer.parseInt(textMinSize.getText());
+		maxSize = Integer.parseInt(textMaxSize.getText());
 		MatOfRect faces = new MatOfRect();
 		Mat grayFrame = new Mat();
 		
@@ -209,13 +224,13 @@ public class FaceDetectionController
 		}
 		
 		// detect faces
-		this.faceCascade.detectMultiScale(grayFrame, faces, 1.7, 12, 0 | Objdetect.CASCADE_SCALE_IMAGE,
-				new Size(this.absoluteFaceSize, this.absoluteFaceSize), new Size());
+		this.faceCascade.detectMultiScale(grayFrame, faces, scaleFac, minNeigh, 0 | Objdetect.CASCADE_SCALE_IMAGE,
+				new Size(minSize, minSize), new Size(maxSize, maxSize));
 				
 		// each rectangle in faces is a face: draw them!
 		Rect[] facesArray = faces.toArray();
 		for (int i = 0; i < facesArray.length; i++)
-			Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0), 3);
+			Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0), 2);
 			
 	}
 	
@@ -227,24 +242,8 @@ public class FaceDetectionController
 	protected void haarSelected(Event event)
 	{
 		// check whether the lpb checkbox is selected and deselect it
-		if (this.lbpClassifier.isSelected())
-			this.lbpClassifier.setSelected(false);
 			
-		this.checkboxSelection("resources/haarcascades/haarcascade_upview(0_13st).xml");
-	}
-	
-	/**
-	 * The action triggered by selecting the LBP Classifier checkbox. It loads
-	 * the trained set to be used for frontal face detection.
-	 */
-	@FXML
-	protected void lbpSelected(Event event)
-	{
-		// check whether the haar checkbox is selected and deselect it
-		if (this.haarClassifier.isSelected())
-			this.haarClassifier.setSelected(false);
-			
-		this.checkboxSelection("resources/lbpcascades/lbpcascade_frontalface.xml");
+		this.checkboxSelection("resources/haarcascades/cascade_sahar18_24.xml");
 	}
 	
 	/**

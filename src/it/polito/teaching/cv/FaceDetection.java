@@ -35,7 +35,8 @@ public class FaceDetection extends Application
 			// set a whitesmoke background
 			root.setStyle("-fx-background-color: whitesmoke;");
 			// create and style a scene
-			Scene scene = new Scene(root, 800, 600);
+			Scene scene = new Scene(root, 900, 620);
+			//primaryStage.getScene().getStylesheets().add(getClass().getResource("JMetroDarkTheme.css"));
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			// create the stage with the given title and the previously created
 			// scene
