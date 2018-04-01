@@ -30,7 +30,7 @@ public class FaceDetection extends Application
 		try
 		{
 			// load the FXML resource
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("FaceDetection.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("PeopleDetection.fxml"));
 			BorderPane root = (BorderPane) loader.load();
 			// set a whitesmoke background
 			root.setStyle("-fx-background-color: whitesmoke;");
